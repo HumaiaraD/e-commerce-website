@@ -9,16 +9,18 @@ items = [
     Inventory(1, "Coffee", 5.99, "Beverages", "001234", 10)
 ]
 
+# welcome message
 @app.route("/", methods=["GET"])
 def welcome():
     return jsonify({"message": "Welcome to the inventory!"}), 200
 
 
+# displaying of items
 @app.route("/inventory", methods=["GET"])
-def get_items():
+def display_item():
     return jsonify([item.to_display() for item in items]), 200
 
-
+# finding one item
 @app.route("/inventory/<int:id>", methods=["GET"])
 def get_item(id):
     item = next((item for item in items if item.id == id), None)
@@ -28,7 +30,7 @@ def get_item(id):
     
     return jsonify(item.to_display()),200
 
-
+# adding an item 
 @app.route("/inventory", methods=["POST"])
 def add_item():
     data = request.get_json()
@@ -45,7 +47,7 @@ def add_item():
 
     return jsonify(new_item.to_display()), 201
 
-
+# updating an item
 @app.route("/inventory/<int:id>", methods=["PATCH"])
 def update_item(id):
     data = request.get_json()
@@ -71,6 +73,7 @@ def update_item(id):
 
     return jsonify(item.to_display()), 200
 
+# delete an item
 @app.route("/inventory/<int:id>", methods=["DELETE"])
 def delete_item(id):
     item = next((item for item in items if item.id == id), None)
@@ -81,6 +84,7 @@ def delete_item(id):
     return "", 204
 
 
+# fetching a product for its barcode
 def fetch_product(barcode):
     headers = {
         "User-Agent": "InventoryLearningApp/1.0 (studentof@flatironschool.com)"
@@ -94,6 +98,8 @@ def fetch_product(barcode):
     response.raise_for_status()
     return response.json()
 
+
+# fetching item using barcode and fetch_product fucntion
 @app.route("/inventory/lookup", methods=["GET"])
 def lookup_item():
     barcode = request.args.get("barcode")
