@@ -12,8 +12,8 @@ class Inventory:
 
     def to_display(self):
         return {"id": self.id, "name": self.name, 
-                "price": self.price, "quantity": self.quantity, 
-                "category": self.category, "barcode": self.barcode
+                "price": self.price,"category": self.category, 
+                "barcode": self.barcode, "quantity": self.quantity,
                 }
 
 

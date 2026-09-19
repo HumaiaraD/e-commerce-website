@@ -1,11 +1,12 @@
 # app.py
 from flask import Flask, jsonify, request
 from store import Inventory
+import requests
 
 app = Flask(__name__)
 
 items = [
-    Inventory(1, "Coffee", 5.99, "Beverages", "001234")
+    Inventory(1, "Coffee", 5.99, "Beverages", "001234", 10)
 ]
 
 @app.route("/", methods=["GET"])
@@ -37,7 +38,8 @@ def add_item():
         data["name"],
         data["price"],
         data["category"],
-        data["barcode"]
+        data["barcode"],
+        data["quantity"]
     )
     items.append(new_item)
 
@@ -78,5 +80,33 @@ def delete_item(id):
 
     return "", 204
 
+
+def fetch_product(barcode):
+    headers = {
+        "User-Agent": "InventoryLearningApp/1.0 (studentof@flatironschool.com)"
+    }
+
+    response = requests.get(
+        f"https://world.openfoodfacts.org/api/v3.6/product/{barcode}.json",
+        headers=headers,
+        timeout=10
+    )
+    response.raise_for_status()
+    return response.json()
+
+@app.route("/inventory/lookup", methods=["GET"])
+def lookup_item():
+    barcode = request.args.get("barcode")
+    data = fetch_product(barcode)
+    product = data.get("product", {})
+    return jsonify({
+        "barcode": barcode,
+        "name": product.get("product_name"),
+        "brand": product.get("brands"),
+        "ingredients": product.get("ingredients_text")
+    })
+
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
